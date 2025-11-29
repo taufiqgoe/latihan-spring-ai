@@ -1,0 +1,13 @@
+services:
+  pgvector:
+    image: pgvector/pgvector:0.8.1-pg17-trixie
+    container_name: pgvector
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: spring_ai_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
