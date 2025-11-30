@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
-import org.springframework.ai.vectorstore.SearchRequest;
-import org.springframework.ai.vectorstore.pgvector.PgVectorStore;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,21 +15,19 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 public class ChatController {
 
-    private final ChatClient chatClient;
+    private final ChatClient openAiChatClient;
     private final IndexService indexService;
 
-    public ChatController(ChatClient.Builder builder, PgVectorStore pgVectorStore, IndexService indexService) {
-        this.chatClient = builder.defaultAdvisors(QuestionAnswerAdvisor.builder(pgVectorStore)
-                        .searchRequest(SearchRequest.builder().build())
-                        .build())
-                .build();
+    public ChatController(ChatClient openAiChatClient, IndexService indexService) {
+        this.openAiChatClient = openAiChatClient;
         this.indexService = indexService;
     }
 
     @PostMapping("chat")
-    public MessageDto chat(@RequestBody MessageDto messageDto) {
-        String content = chatClient.prompt().user(messageDto.getMessage()).call().content();
-        return new MessageDto(content);
+    public String chat(@RequestBody MessageDto messageDto) {
+        String content = openAiChatClient.prompt().user(messageDto.getMessage()).call().content();
+//        return new MessageDto(content);
+        return content;
     }
 
     @PostMapping(value = "upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -47,5 +42,4 @@ public class ChatController {
     public static class MessageDto {
         private String message;
     }
-
 }
