@@ -1,6 +1,7 @@
 package id.taufiq.latihan.spring_ai.service;
 
 import id.taufiq.latihan.spring_ai.exception.UnsupportedFileFormatException;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
@@ -9,6 +10,8 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Component
 public class IndexService {
@@ -19,7 +22,7 @@ public class IndexService {
         this.vectorStore = vectorStore;
     }
 
-    public void index(MultipartFile file) {
+    public void index(MultipartFile file,  String tenant) {
         try {
             validatePdf(file);
             Resource resource = new ByteArrayResource(file.getBytes()) {
@@ -30,7 +33,11 @@ public class IndexService {
             };
             var pdfReader = new TikaDocumentReader(resource);
             TextSplitter textSplitter = new TokenTextSplitter();
-            vectorStore.accept(textSplitter.apply(pdfReader.get()));
+            List<Document> documents = pdfReader.get();
+            for (Document document : documents) {
+                document.getMetadata().put("tenant", tenant.toLowerCase());
+            }
+            vectorStore.accept(textSplitter.apply(documents));
         } catch (Exception e) {
             throw new IllegalStateException("Failed to index uploaded file", e);
         }
