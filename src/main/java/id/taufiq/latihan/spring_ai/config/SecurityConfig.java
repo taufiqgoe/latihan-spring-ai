@@ -1,6 +1,5 @@
 package id.taufiq.latihan.spring_ai.config;
 
-import id.taufiq.latihan.spring_ai.security.TokenAuthenticationFilter;
 import id.taufiq.latihan.spring_ai.service.TokenService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

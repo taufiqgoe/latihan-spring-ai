@@ -1,4 +1,4 @@
-package id.taufiq.latihan.spring_ai.tools;
+package id.taufiq.latihan.spring_ai.tool;
 
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.context.i18n.LocaleContextHolder;

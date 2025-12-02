@@ -1,38 +1,54 @@
 package id.taufiq.latihan.spring_ai.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import id.taufiq.latihan.spring_ai.exception.UnsupportedFileFormatException;
+import id.taufiq.latihan.spring_ai.model.dto.FileUploadedEvent;
+import id.taufiq.latihan.spring_ai.util.ObjectStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
-import org.springframework.ai.transformer.splitter.TextSplitter;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Component
 public class IndexService {
 
-    private final VectorStore vectorStore;
+    private static final Logger log = LoggerFactory.getLogger(IndexService.class);
 
-    public IndexService(VectorStore vectorStore) {
+    private final VectorStore vectorStore;
+    private final ObjectStorage objectStorage;
+    private final ObjectMapper objectMapper;
+
+    public IndexService(VectorStore vectorStore, ObjectStorage objectStorage, ObjectMapper objectMapper) {
         this.vectorStore = vectorStore;
+        this.objectStorage = objectStorage;
+        this.objectMapper = objectMapper;
     }
 
-    public void index(MultipartFile file,  String tenant) {
+    @KafkaListener(topics = "${app.kafka.topics.file-upload}", groupId = "${app.kafka.consumer.group-id:indexer}")
+    public void handle(String payload) {
         try {
-            validatePdf(file);
-            Resource resource = new ByteArrayResource(file.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return file.getOriginalFilename();
-                }
-            };
-            var pdfReader = new TikaDocumentReader(resource);
-            TextSplitter textSplitter = new TokenTextSplitter();
+            FileUploadedEvent event = objectMapper.readValue(payload, FileUploadedEvent.class);
+            Resource resource = objectStorage.download(event.getBucket(), event.getKey());
+            index(resource, event.getTenant(), event.getOriginalFilename());
+            log.info("Indexed file {} for tenant {}", event.getKey(), event.getTenant());
+        } catch (Exception e) {
+            log.error("Failed to index file payload {}", payload, e);
+            throw new IllegalStateException("Failed to process upload event", e);
+        }
+    }
+
+    public void index(Resource resource, String tenant, String originalFilename) {
+        try {
+            validatePdf(originalFilename != null ? originalFilename : resource.getFilename());
+            TikaDocumentReader pdfReader = new TikaDocumentReader(resource);
+            TokenTextSplitter textSplitter = new TokenTextSplitter();
             List<Document> documents = pdfReader.get();
             for (Document document : documents) {
                 document.getMetadata().put("tenant", tenant.toLowerCase());
@@ -43,8 +59,7 @@ public class IndexService {
         }
     }
 
-    private void validatePdf(MultipartFile file) {
-        String filename = file.getOriginalFilename();
+    private void validatePdf(String filename) {
         if (filename == null || !filename.toLowerCase().endsWith(".pdf")) {
             throw new UnsupportedFileFormatException("File format is not supported. Only PDF files are allowed.");
         }

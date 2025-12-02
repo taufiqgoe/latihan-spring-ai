@@ -1,4 +1,4 @@
-package id.taufiq.latihan.spring_ai.security;
+package id.taufiq.latihan.spring_ai.config;
 
 import id.taufiq.latihan.spring_ai.service.TokenService;
 import jakarta.servlet.FilterChain;
@@ -30,8 +30,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         Optional<String> bearerToken = resolveToken(request.getHeader(HttpHeaders.AUTHORIZATION));
-        bearerToken
-                .map(tokenService::getUsername)
+        bearerToken.map(tokenService::getUsername)
                 .filter(username -> SecurityContextHolder.getContext().getAuthentication() == null)
                 .ifPresent(username -> authenticate(username, request));
         filterChain.doFilter(request, response);
