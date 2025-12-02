@@ -24,8 +24,7 @@ public class TokenService {
         byte[] randomBytes = new byte[TOKEN_BYTE_LENGTH];
         secureRandom.nextBytes(randomBytes);
         String token = Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
-        AuthToken authToken = new AuthToken(token, username);
-        authToken.setCreatedAt(LocalDateTime.now());
+        AuthToken authToken = new AuthToken(token, username, LocalDateTime.now());
         tokenRepository.save(authToken);
         return token;
     }
