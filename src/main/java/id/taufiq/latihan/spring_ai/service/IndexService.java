@@ -10,6 +10,8 @@ import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
+import org.springframework.ai.vectorstore.filter.Filter;
+import org.springframework.ai.vectorstore.filter.FilterExpressionBuilder;
 import org.springframework.core.io.Resource;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
@@ -46,13 +48,20 @@ public class IndexService {
 
     public void index(Resource resource, String tenant, String originalFilename) {
         try {
-            validatePdf(originalFilename != null ? originalFilename : resource.getFilename());
+            String filename = originalFilename != null ? originalFilename : resource.getFilename();
+            validatePdf(filename);
             TikaDocumentReader pdfReader = new TikaDocumentReader(resource);
             TokenTextSplitter textSplitter = new TokenTextSplitter();
             List<Document> documents = pdfReader.get();
             for (Document document : documents) {
                 document.getMetadata().put("tenant", tenant.toLowerCase());
             }
+
+            FilterExpressionBuilder filterExpressionBuilder = new FilterExpressionBuilder();
+            FilterExpressionBuilder.Op filterTenant = filterExpressionBuilder.eq("tenant", tenant);
+            FilterExpressionBuilder.Op filterSource = filterExpressionBuilder.eq("source", filename);
+            vectorStore.delete(filterExpressionBuilder.and(filterTenant, filterSource).build());
+
             vectorStore.accept(textSplitter.apply(documents));
         } catch (Exception e) {
             throw new IllegalStateException("Failed to index uploaded file", e);

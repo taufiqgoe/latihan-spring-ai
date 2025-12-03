@@ -6,6 +6,7 @@ import id.taufiq.latihan.spring_ai.exception.UnsupportedFileFormatException;
 import id.taufiq.latihan.spring_ai.model.dto.MessageDto;
 import id.taufiq.latihan.spring_ai.model.dto.FileUploadedEvent;
 import id.taufiq.latihan.spring_ai.model.dto.StoredObject;
+import id.taufiq.latihan.spring_ai.tool.AiTool;
 import id.taufiq.latihan.spring_ai.util.ObjectStorage;
 import id.taufiq.latihan.spring_ai.util.MessageBroker;
 import org.springframework.ai.chat.client.ChatClient;
@@ -22,28 +23,27 @@ public class ChatService {
 
     private final ChatClient openAiChatClient;
     private final VectorStore vectorStore;
-    private final RateLimiterService rateLimiterService;
     private final ObjectStorage objectStorage;
     private final ObjectMapper objectMapper;
     private final MessageBroker messageBroker;
     private final String fileUploadTopic;
     private final String bucketName;
+    private final AiTool aiTool;
 
     public ChatService(ChatClient openAiChatClient,
                        VectorStore vectorStore,
-                       RateLimiterService rateLimiterService,
                        ObjectStorage objectStorage,
                        MessageBroker messageBroker,
                        ObjectMapper objectMapper,
-                       Environment environment) {
+                       Environment environment, AiTool aiTool) {
         this.openAiChatClient = openAiChatClient;
         this.vectorStore = vectorStore;
-        this.rateLimiterService = rateLimiterService;
         this.objectStorage = objectStorage;
         this.messageBroker = messageBroker;
         this.objectMapper = objectMapper;
         this.fileUploadTopic = environment.getRequiredProperty("app.kafka.topics.file-upload");
         this.bucketName = environment.getRequiredProperty("app.s3.bucket-name");
+        this.aiTool = aiTool;
     }
 
     public String chat(String userMessage, String tenant) {
@@ -56,6 +56,7 @@ public class ChatService {
 
         return openAiChatClient.prompt()
                 .user(userMessage)
+                .tools(aiTool)
                 .advisors(questionAnswerAdvisor)
                 .call()
                 .content();

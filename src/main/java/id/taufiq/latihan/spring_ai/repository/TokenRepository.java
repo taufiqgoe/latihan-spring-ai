@@ -1,7 +1,7 @@
 package id.taufiq.latihan.spring_ai.repository;
 
 import id.taufiq.latihan.spring_ai.model.entity.AuthToken;
-import id.taufiq.latihan.spring_ai.repository.mapper.Mappers;
+import id.taufiq.latihan.spring_ai.util.Mapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -31,7 +31,7 @@ public class TokenRepository {
 
     public Optional<AuthToken> findById(String token) {
         String sql = "SELECT token, username, created_at FROM tokens WHERE token = ?";
-        return jdbcTemplate.query(sql, Mappers.AUTH_TOKEN_ROW_MAPPER, token).stream().findFirst();
+        return jdbcTemplate.query(sql, Mapper.AUTH_TOKEN_ROW_MAPPER, token).stream().findFirst();
     }
 
     public void deleteById(String token) {

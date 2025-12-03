@@ -1,7 +1,7 @@
 package id.taufiq.latihan.spring_ai.repository;
 
 import id.taufiq.latihan.spring_ai.model.entity.UserAccount;
-import id.taufiq.latihan.spring_ai.repository.mapper.Mappers;
+import id.taufiq.latihan.spring_ai.util.Mapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +18,7 @@ public class UserAccountRepository {
 
     public Optional<UserAccount> findByUsername(String username) {
         String sql = "SELECT id, username, password, roles, enabled FROM users WHERE username = ?";
-        return jdbcTemplate.query(sql, Mappers.USER_ACCOUNT_ROW_MAPPER, username).stream().findFirst();
+        return jdbcTemplate.query(sql, Mapper.USER_ACCOUNT_ROW_MAPPER, username).stream().findFirst();
     }
 
     public boolean existsByUsername(String username) {
