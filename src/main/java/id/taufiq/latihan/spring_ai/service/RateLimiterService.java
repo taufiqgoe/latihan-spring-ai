@@ -11,8 +11,9 @@ import java.time.LocalDate;
 @Service
 public class RateLimiterService {
 
-    private final UserRateLimitRepository rateLimitRepository;
     private static final int MAX_REQUESTS = 10;
+    private final UserRateLimitRepository rateLimitRepository;
+
     public RateLimiterService(UserRateLimitRepository rateLimitRepository) {
         this.rateLimitRepository = rateLimitRepository;
     }

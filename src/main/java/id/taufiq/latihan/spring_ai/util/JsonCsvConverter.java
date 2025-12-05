@@ -70,7 +70,7 @@ public final class JsonCsvConverter {
         }
     }
 
-    private static void appendLine(StringBuilder sb, List<String> cells) {
+    private void appendLine(StringBuilder sb, List<String> cells) {
         for (int i = 0; i < cells.size(); i++) {
             if (i > 0) {
                 sb.append(',');
@@ -80,7 +80,7 @@ public final class JsonCsvConverter {
         sb.append('\n');
     }
 
-    private static String asCell(JsonNode node) {
+    private String asCell(JsonNode node) {
         if (node == null || node.isNull()) {
             return "";
         }

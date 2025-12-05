@@ -1,22 +1,15 @@
 package id.taufiq.latihan.spring_ai.util;
 
-import id.taufiq.latihan.spring_ai.model.entity.AuthToken;
-import id.taufiq.latihan.spring_ai.model.entity.TransactionSummaryAll;
-import id.taufiq.latihan.spring_ai.model.entity.UserAccount;
-import id.taufiq.latihan.spring_ai.model.entity.UserRateLimit;
+import id.taufiq.latihan.spring_ai.model.entity.*;
 import org.springframework.jdbc.core.RowMapper;
 
 public final class Mapper {
-
-    private Mapper() {
-    }
 
     public static final RowMapper<AuthToken> AUTH_TOKEN_ROW_MAPPER = (rs, rowNum) -> new AuthToken(
             rs.getString("token"),
             rs.getString("username"),
             rs.getTimestamp("created_at").toLocalDateTime()
     );
-
     public static final RowMapper<UserAccount> USER_ACCOUNT_ROW_MAPPER = (rs, rowNum) -> new UserAccount(
             rs.getLong("id"),
             rs.getString("username"),
@@ -24,14 +17,12 @@ public final class Mapper {
             rs.getString("roles"),
             rs.getBoolean("enabled")
     );
-
     public static final RowMapper<UserRateLimit> USER_RATE_LIMIT_ROW_MAPPER = (rs, rowNum) -> new UserRateLimit(
             rs.getString("username"),
             rs.getInt("max_requests"),
             rs.getInt("request_count"),
             rs.getDate("request_date").toLocalDate()
     );
-
     public static final RowMapper<TransactionSummaryAll> TRANSACTION_SUMMARY_ALL_ROW_MAPPER = (rs, rowNum) -> new TransactionSummaryAll(
 
             // === DATE ===
@@ -85,4 +76,13 @@ public final class Mapper {
             rs.getLong("amount_trx_shopeepay_qr"),
             rs.getLong("amount_trx_va_transfer")
     );
+    public static final RowMapper<WebSearchHistory> WEB_SEARCH_HISTORY_ROW_MAPPER = (rs, rowNum) -> new WebSearchHistory(
+            rs.getString("id"),
+            rs.getString("query"),
+            rs.getString("raw_request"),
+            rs.getString("raw_response")
+    );
+
+    private Mapper() {
+    }
 }

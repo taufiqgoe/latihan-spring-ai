@@ -3,12 +3,12 @@ package id.taufiq.latihan.spring_ai.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.taufiq.latihan.spring_ai.exception.UnsupportedFileFormatException;
-import id.taufiq.latihan.spring_ai.model.dto.MessageDto;
 import id.taufiq.latihan.spring_ai.model.dto.FileUploadedEvent;
+import id.taufiq.latihan.spring_ai.model.dto.MessageDto;
 import id.taufiq.latihan.spring_ai.model.dto.StoredObject;
 import id.taufiq.latihan.spring_ai.tool.AiTool;
-import id.taufiq.latihan.spring_ai.util.ObjectStorage;
 import id.taufiq.latihan.spring_ai.util.MessageBroker;
+import id.taufiq.latihan.spring_ai.util.ObjectStorage;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.vectorstore.SearchRequest;
@@ -35,7 +35,8 @@ public class ChatService {
                        ObjectStorage objectStorage,
                        MessageBroker messageBroker,
                        ObjectMapper objectMapper,
-                       Environment environment, AiTool aiTool) {
+                       Environment environment,
+                       AiTool aiTool) {
         this.openAiChatClient = openAiChatClient;
         this.vectorStore = vectorStore;
         this.objectStorage = objectStorage;
